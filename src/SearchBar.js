@@ -4,12 +4,14 @@ import {Field, reduxForm} from 'redux-form';
 import {useSelector, useDispatch} from "react-redux";
 
 function SearchBar() {
-    const state = useSelector(state => state);
+    const inputText = useSelector(state => state.form.search.values.address);
+    const selectedList = useSelector(state => state.appState.selectedList);
+    const changeInput = useSelector(state => state.appState.changeInput);
     const dispatch = useDispatch();
     const apiKey = '0968b911-b62d-4570-8c3f-82ba6fb40b1d';
-    const geoCode = state.form.search.values.address;
+    const geoCode = inputText;
 
-    if (geoCode && state.appState.changeInput) {
+    if (geoCode && changeInput) {
         axios.get(`https://geocode-maps.yandex.ru/1.x/?format=json&apikey=${apiKey}&geocode=${geoCode}`)
             .then(res => {
                 const currentSelect = res.data.response.GeoObjectCollection.featureMember;
@@ -45,11 +47,11 @@ function SearchBar() {
     };
 
     const addPoint = (index) => {
-        const selected = state.appState.selectedList[index];
+        const selected = selectedList[index];
         dispatch({type: 'ADD_NEW_MARKER', point: [selected.point[1], selected.point[0]], info: selected.info});
     };
 
-    const showList = state.appState.selectedList.map((obj,index) => <li id={index} onClick={handleClick}>{obj.info}</li>);
+    const showList = selectedList.map((obj,index) => <li id={index} onClick={handleClick}>{obj.info}</li>);
 
     return (
         <div>
