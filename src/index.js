@@ -1,12 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {Provider} from 'react-redux';
-import {createStore, combineReducers} from 'redux';
+import {applyMiddleware, createStore, combineReducers} from 'redux';
 import {reducer as formReducer} from 'redux-form';
+import createSagaMiddleware from 'redux-saga'
+import {composeWithDevTools} from "redux-devtools-extension";
 
 import './index.css';
 import App from './App';
+import mySaga from './saga';
 
+const sagaMiddleware = createSagaMiddleware();
 const initialState = {
     points: [
         {
@@ -28,8 +32,8 @@ const mainReducer = (state = initialState, action) => {
             return {...state, points: [...state.points, {point: action.point, info: action.info}]};
         case 'CHANGE_SELECTED_LIST':
             return {...state, selectedList: action.selectedList};
-        case 'CHANGE_INPUT':
-            return {...state, changeInput: action.payload};
+        // case 'CHANGE_INPUT':
+        //     return {...state, changeInput: action.payload};
         default:
             return state;
     }
@@ -40,7 +44,12 @@ const reducer = combineReducers({
     appState: mainReducer,
 });
 
-const store = createStore(reducer, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
+const store = createStore(
+    reducer,
+    composeWithDevTools(applyMiddleware(sagaMiddleware)),
+);
+
+sagaMiddleware.run(mySaga);
 
 ReactDOM.render(
     <Provider store={store}>
